@@ -1,9 +1,65 @@
 authentication
 ============================
-null
+
+Authentication for the client or server (or both)
 
 Usage
 -----
+
+Use the local OS authentication
+
+```javascript
+import { Authentication } from '@environment-safe/authentication';
+
+(()=>{
+    const authenticator = new Authentication({
+        passkey : 'native' // use native password store
+    });
+    try{
+        const user = await authenticator.authenticate();
+    }catch(ex){
+        // login failures happen here
+    }
+})();
+```
+
+Provide your own authentication
+
+```javascript
+import { Authentication } from '@environment-safe/authentication';
+
+(()=>{
+    const authenticator = new Authentication({
+        passkey : {
+            host : 'my.passkey.host',
+            port : '13009',
+        }
+    });
+    //do something with the authenticator
+})();
+```
+
+In the server:
+
+```javascript
+try{
+    await authenticator.serve();
+}catch(ex){
+    // server crash
+}
+```
+
+In the client:
+
+```javascript
+try{
+    const user = await authenticator.authenticate();
+}catch(ex){
+    // login failures happen here
+}
+```
+
+This pattern should work across all environments, more granular control will require environment specific hooks.
 
 Testing
 -------
