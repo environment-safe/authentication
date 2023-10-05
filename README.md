@@ -1,7 +1,7 @@
 authentication
 ============================
 
-Authentication for the client or server (or both)
+Authentication for the client or server (or both) via WebAuthN.
 
 Usage
 -----
@@ -27,23 +27,32 @@ Provide your own authentication
 
 ```javascript
 import { Authentication } from '@environment-safe/authentication';
-
-(()=>{
-    const authenticator = new Authentication({
-        passkey : {
-            host : 'my.passkey.host',
-            port : '13009',
-        }
-    });
-    //do something with the authenticator
-})();
 ```
 
 In the server:
 
 ```javascript
 try{
-    await authenticator.serve();
+    const authenticator = new Authentication({
+        host : 'my.passkey.host',
+        port : '13009',
+    }, {
+        create : async (user)=>{
+            // create a record
+        },
+        lookup : async (user)=>{
+            // lookup a single record
+        },
+        remove : async (user)=>{
+            // remove a single record
+        },
+        init : async ()=>{
+            // initialize the DB
+        },
+    });
+    await authenticator.serve((err, credentials)=>{
+        // return false, an error or metadata associated with success
+    });
 }catch(ex){
     // server crash
 }
@@ -53,16 +62,25 @@ In the client:
 
 ```javascript
 try{
+    const authenticator = new Authentication({
+        host : 'my.passkey.host',
+        port : '13009',
+    });
     const user = await authenticator.authenticate();
 }catch(ex){
     // login failures happen here
 }
 ```
 
+For now the use cases are simple, but eventually it may be possible to run servers *from* clients.
+
+Server side authentication is a work in progress and needs a little work. 
+
 This pattern should work across all environments, more granular control will require environment specific hooks.
 
 Testing
 -------
+Unfortunately this can't be fully automated to test on all browsers [due to a missing feature](https://github.com/microsoft/playwright/issues/7276) in playwright, once this is done, we'll add support for webkit and firefox.
 
 Run the es module tests to test the root modules
 ```bash
